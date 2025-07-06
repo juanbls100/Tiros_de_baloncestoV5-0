@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de encestes de baloncesto</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for microphone icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js library for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #FF5722; /* Naranja Baloncesto */
+            --secondary-color: #4CAF50; /* Verde Cancha */
+            --accent-color: #FFC107; /* Amarillo Balón */
+            --dark-color: #212121; /* Gris Oscuro */
+            --light-color: #E0E0E0; /* Gris Claro */
+            --text-color: #FFFFFF; /* Blanco para texto */
+            --card-bg: rgba(33, 33, 33, 0.85); /* Fondo de tarjetas semitransparente */
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('https://admin.hedefliseyi.edu.az/storage/uploads/images/education/basketbol-1675075654.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        header h1 {
+            margin: 0;
+            color: var(--primary-color);
+            font-family: 'Oswald', sans-serif;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+        }
+
+        nav {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 0.5rem 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        nav button {
+            background-color: transparent;
+            border: none;
+            color: var(--text-color);
+            padding: 0.8rem 1.5rem;
+            margin: 0 0.5rem;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            border-radius: 5px;
+            font-family: 'Oswald', sans-serif;
+        }
+
+        nav button:hover {
+            background-color: var(--primary-color);
+            color: var(--dark-color);
+        }
+
+        nav button.active {
+            background-color: var(--primary-color);
+            color: var(--dark-color);
+            box-shadow: 0 0 15px var(--accent-color);
+        }
+
+        main {
+            flex-grow: 1;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 2rem;
+        }
+
+        section {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+            width: 100%;
+            max-width: 600px; /* Default max-width for most sections */
+            display: none; /* Ocultar todas las secciones por defecto */
+        }
+
+        section.active {
+            display: block; /* Mostrar la sección activa */
+        }
+
+        /* Dashboard specific styles */
+        #dashboardSection {
+            max-width: 900px; /* Wider for the chart */
+            width: 100%;
+        }
+        #dashboardCanvasContainer {
+            position: relative;
+            height: 400px; /* Fixed height for the chart */
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .dashboard-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+        }
+
+        .dashboard-controls label {
+            font-size: 1.1rem;
+            color: var(--light-color);
+            font-weight: bold;
+        }
+
+        .dashboard-controls select {
+            padding: 0.6rem 1rem;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: var(--text-color);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .dashboard-controls select option {
+            background-color: var(--dark-color);
+            color: var(--text-color);
+        }
+
+
+        h2 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-family: 'Oswald', sans-serif;
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Capture Section */
+        .capture-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+            position: relative; /* For dropdown positioning */
+            margin-bottom: 1.5rem; /* Space below input groups */
+        }
+
+        .input-group label {
+            font-size: 1.2rem;
+            color: var(--light-color);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Custom Dropdown Styles */
+        .custom-dropdown {
+            width: 80%;
+            position: relative;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .dropdown-display {
+            padding: 0.8rem;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            font-size: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 2.5rem; /* Ensure consistent height */
+            position: relative; /* For pseudo-element positioning */
+        }
+
+        .dropdown-display::after {
+            content: '\25BC'; /* Unicode for a black down-pointing triangle */
+            position: absolute;
+            right: 15px;
+            font-size: 0.8em;
+            color: var(--accent-color);
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-options.active + .dropdown-display::after {
+            transform: rotate(180deg); /* Rotate arrow when active */
+        }
+
+
+        .dropdown-options {
+            position: absolute;
+            top: 100%; /* Position below the display */
+            left: 0;
+            width: 100%;
+            background-color: var(--dark-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            max-height: 200px; /* Limit height for scroll */
+            overflow-y: auto;
+            z-index: 10;
+            display: none; /* Hidden by default */
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease, display 0.3s ease;
+        }
+
+        .dropdown-options.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .dropdown-option {
+            padding: 0.8rem;
+            font-size: 1.2rem;
+            color: var(--light-color);
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .dropdown-option:hover {
+            background-color: var(--primary-color);
+            color: var(--dark-color);
+        }
+
+        /* Observations Textarea and Microphone Button */
+        .observations-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+            width: 100%;
+        }
+
+        .observations-input-wrapper {
+            display: flex;
+            width: 80%; /* Match dropdown width */
+            gap: 10px;
+            align-items: center;
+        }
+
+        .observations-group textarea {
+            flex-grow: 1;
+            padding: 0.8rem;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: var(--text-color);
+            outline: none;
+            resize: vertical; /* Allow vertical resizing */
+            min-height: 80px;
+        }
+
+        .microphone-button {
+            background-color: var(--secondary-color);
+            color: var(--dark-color);
+            border: none;
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        .microphone-button:hover {
+            background-color: #66BB6A;
+            transform: translateY(-2px);
+        }
+
+        .microphone-button.recording {
+            background-color: #F44336; /* Red when recording */
+            color: var(--text-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+        }
+
+
+        #saveSessionBtn {
+            background-color: var(--accent-color);
+            color: var(--dark-color);
+            width: 100%;
+            margin-top: 2rem;
+            font-size: 1.3rem;
+            padding: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-transform: uppercase;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        #saveSessionBtn:hover {
+            background-color: #FFD54F;
+            transform: translateY(-3px);
+        }
+
+        .reset-button {
+            background-color: #F44336; /* Red */
+            color: var(--text-color);
+            margin-top: 1rem;
+            padding: 1rem 1.8rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-transform: uppercase;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 0.5px;
+            width: 100%; /* Make it full width like save button */
+        }
+
+        .reset-button:hover {
+            background-color: #EF5350;
+            transform: translateY(-2px);
+        }
+
+
+        /* Statistics Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-card {
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+            border-left: 5px solid var(--secondary-color);
+        }
+
+        .stat-card h3 {
+            margin-top: 0;
+            color: var(--accent-color);
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.5rem;
+        }
+
+        .stat-card p {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* History Section */
+        #historyList {
+            list-style: none;
+            padding: 0;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--primary-color);
+            border-radius: 10px;
+        }
+
+        #historyList::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #historyList::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        #historyList::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+
+        #historyList li {
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.8rem;
+            border-radius: 8px;
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping for smaller screens */
+            justify-content: space-between;
+            align-items: flex-start; /* Align items to the top */
+            font-size: 1.1rem;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        #historyList li:last-child {
+            margin-bottom: 0;
+        }
+
+        #historyList li span {
+            color: var(--light-color);
+            flex-basis: 48%; /* Adjust width for two columns */
+            margin-bottom: 0.5rem; /* Spacing between rows */
+        }
+
+        #historyList li span.full-width {
+            flex-basis: 100%; /* For observations */
+            margin-top: 0.5rem; /* Space above observations */
+            font-style: italic;
+            color: #BBBBBB; /* Slightly lighter color for observations */
+        }
+
+
+        #historyList li strong {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: var(--light-color);
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 2rem;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+            font-size: 0.9rem;
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            main {
+                flex-direction: column;
+                align-items: center;
+                padding: 1rem;
+            }
+
+            section {
+                padding: 1.5rem;
+                max-width: 95%;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            nav button {
+                font-size: 1rem;
+                padding: 0.6rem 1rem;
+            }
+
+            .stat-card p {
+                font-size: 1.8rem;
+            }
+
+            #historyList li span {
+                flex-basis: 100%; /* Full width on small screens */
+                text-align: center;
+            }
+            .observations-input-wrapper {
+                flex-direction: column;
+                width: 100%;
+            }
+            .observations-group textarea {
+                width: 100%; /* Full width on small screens */
+            }
+            .microphone-button {
+                width: 100%; /* Full width on small screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            nav button {
+                font-size: 0.9rem;
+                padding: 0.5rem 0.8rem;
+                margin: 0 0.3rem;
+            }
+
+            #saveSessionBtn, .reset-button {
+                width: 100%;
+                font-size: 1rem;
+                padding: 0.8rem;
+            }
+
+            .stat-card h3 {
+                font-size: 1.3rem;
+            }
+
+            .stat-card p {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Registro de encestes de baloncesto</h1>
+    </header>
+
+    <nav>
+        <button id="showCaptureBtn" class="active">Captura de Encestes</button>
+        <button id="showStatsBtn">Estadísticas</button>
+        <button id="showHistoryBtn">Historial</button>
+        <button id="showDashboardBtn">Dashboard</button>
+    </nav>
+
+    <main>
+        <section id="captureSection" class="active">
+            <h2>Captura de Encestes</h2>
+            <div class="capture-grid">
+                <div class="input-group">
+                    <label for="madeShotsDisplay">Encestes Realizados (10-40):</label>
+                    <div class="custom-dropdown">
+                        <div class="dropdown-display" id="madeShotsDisplay">Selecciona...</div>
+                        <div class="dropdown-options" id="madeShotsOptions">
+                            <!-- Options will be generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="observations-group">
+                    <label for="observationsTextarea">Observaciones:</label>
+                    <div class="observations-input-wrapper">
+                        <textarea id="observationsTextarea" placeholder="Escribe o dicta tus observaciones aquí..."></textarea>
+                        <button id="microphoneBtn" class="microphone-button">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button id="saveSessionBtn">Guardar Sesión</button>
+            <button class="reset-button" onclick="resetCurrentSession()">Reiniciar Sesión Actual</button>
+        </section>
+
+        <section id="statsSection">
+            <h2>Estadísticas</h2>
+            <div class="stats-grid">
+                <!-- Order: Tiros Totales, Encestes Totales, Porcentaje General, Mejor Sesión -->
+                <div class="stat-card">
+                    <h3>Tiros Totales</h3>
+                    <p id="overallTotalShots">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Encestes Totales</h3>
+                    <p id="totalMadeShots">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Porcentaje General</h3>
+                    <p id="overallPercentage">0.00%</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Mejor Sesión</h3>
+                    <p id="bestSessionPercentage">0.00%</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="historySection">
+            <h2>Historial</h2>
+            <ul id="historyList">
+                <p style="text-align: center; color: var(--light-color);">No hay sesiones registradas aún.</p>
+            </ul>
+            <button class="reset-button" onclick="clearAllHistory()">Borrar Todo el Historial</button>
+        </section>
+
+        <section id="dashboardSection">
+            <h2>Dashboard de Rendimiento</h2>
+            <div class="dashboard-controls">
+                <label for="timeframeSelect">Ver por:</label>
+                <select id="timeframeSelect">
+                    <option value="day">Día</option>
+                    <option value="week">Semana</option>
+                    <option value="month">Mes</option>
+                </select>
+            </div>
+            <div id="dashboardCanvasContainer">
+                <canvas id="performanceChart"></canvas>
+            </div>
+            <p style="text-align: center; color: var(--light-color); margin-top: 1rem;">
+                Gráfica de Tiros Totales (verde) y Encestes Realizados (naranja) por sesión.
+            </p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Registro de Encestes de Baloncesto.</p>
+    </footer>
+
+    <script>
+        const madeShotsDisplay = document.getElementById('madeShotsDisplay');
+        const madeShotsOptions = document.getElementById('madeShotsOptions');
+        const observationsTextarea = document.getElementById('observationsTextarea');
+        const microphoneBtn = document.getElementById('microphoneBtn');
+        const saveSessionBtn = document.getElementById('saveSessionBtn');
+
+        const totalMadeShotsDisplay = document.getElementById('totalMadeShots');
+        const overallTotalShotsDisplay = document.getElementById('overallTotalShots');
+        const overallPercentageDisplay = document.getElementById('overallPercentage');
+        const bestSessionPercentageDisplay = document.getElementById('bestSessionPercentage');
+        const historyList = document.getElementById('historyList');
+
+        const performanceChartCanvas = document.getElementById('performanceChart');
+        const timeframeSelect = document.getElementById('timeframeSelect'); // New select element
+        let performanceChartInstance = null; // To hold the Chart.js instance
+
+        let sessions = JSON.parse(localStorage.getItem('basketballSessions')) || [];
+        let currentMadeShots = null; // Initial value indicates no selection
+
+        // --- Speech Recognition Setup ---
+        let recognition;
+        let isRecording = false;
+
+        // Check for Web Speech API support
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false; // Stop after a single utterance
+            recognition.lang = 'es-ES'; // Set language to Spanish
+
+            recognition.onstart = () => {
+                isRecording = true;
+                microphoneBtn.classList.add('recording');
+                observationsTextarea.placeholder = "Escuchando...";
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                observationsTextarea.value += (observationsTextarea.value ? ' ' : '') + transcript;
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                if (event.error === 'not-allowed') {
+                    displayMessageBox('Permiso de micrófono denegado. Por favor, permite el acceso al micrófono en la configuración de tu navegador.');
+                } else {
+                    displayMessageBox('Error en el reconocimiento de voz: ' + event.error);
+                }
+                isRecording = false;
+                microphoneBtn.classList.remove('recording');
+                observationsTextarea.placeholder = "Escribe o dicta tus observaciones aquí...";
+            };
+
+            recognition.onend = () => {
+                isRecording = false;
+                microphoneBtn.classList.remove('recording');
+                observationsTextarea.placeholder = "Escribe o dicta tus observaciones aquí...";
+            };
+
+            microphoneBtn.addEventListener('click', () => {
+                if (isRecording) {
+                    recognition.stop();
+                } else {
+                    try {
+                        recognition.start();
+                    } catch (error) {
+                        console.error('Error starting speech recognition:', error);
+                        displayMessageBox('No se pudo iniciar el micrófono. Asegúrate de que tu navegador lo soporta y tienes los permisos.');
+                    }
+                }
+            });
+        } else {
+            // Browser does not support Web Speech API
+            microphoneBtn.disabled = true;
+            microphoneBtn.style.opacity = 0.5;
+            displayMessageBox('Tu navegador no soporta el reconocimiento de voz. Por favor, usa un navegador como Chrome o Edge.');
+            console.warn('Web Speech API (SpeechRecognition) not supported in this browser.');
+        }
+        // --- End Speech Recognition Setup ---
+
+
+        // Function to populate the dropdown options
+        function populateMadeShotsOptions() {
+            for (let i = 10; i <= 40; i++) {
+                const optionDiv = document.createElement('div');
+                optionDiv.classList.add('dropdown-option');
+                optionDiv.textContent = i;
+                optionDiv.dataset.value = i; // Store the value
+                optionDiv.addEventListener('click', () => {
+                    currentMadeShots = parseInt(optionDiv.dataset.value);
+                    madeShotsDisplay.textContent = currentMadeShots;
+                    madeShotsOptions.classList.remove('active'); // Hide options after selection
+                });
+                madeShotsOptions.appendChild(optionDiv);
+            }
+        }
+
+        // Toggle dropdown visibility
+        madeShotsDisplay.addEventListener('click', () => {
+            madeShotsOptions.classList.toggle('active');
+        });
+
+        // Hide dropdown if clicked outside
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.custom-dropdown') && madeShotsOptions.classList.contains('active')) {
+                madeShotsOptions.classList.remove('active');
+            }
+        });
+
+        // Function to save a session
+        saveSessionBtn.addEventListener('click', async () => { // Added async keyword here
+            // Validate that a number has been selected
+            if (currentMadeShots === null || typeof currentMadeShots !== 'number') {
+                displayMessageBox('Por favor, selecciona el número de encestes realizados.');
+                return;
+            }
+
+            const made = currentMadeShots; // Get value from custom dropdown
+            const total = 50; // Each session is now automatically a series of 50 shots
+            const observations = observationsTextarea.value.trim(); // Get observations, trim whitespace
+
+            const date = new Date(); // Get a Date object
+            const dateString = date.toLocaleDateString(); // e.g., "7/5/2025"
+            const timeString = date.toLocaleTimeString(); // e.g., "11:01:00 PM"
+
+            const percentage = (made / total * 100).toFixed(2);
+
+            const session = {
+                made: made,
+                total: total, // Always 50
+                percentage: parseFloat(percentage),
+                date: dateString, // Store date string
+                time: timeString,  // Store time string
+                observations: observations // Store observations
+            };
+
+            sessions.push(session);
+            localStorage.setItem('basketballSessions', JSON.stringify(sessions));
+            updateStats();
+            renderHistory();
+            // Only re-render chart if dashboard is active to avoid errors on hidden canvas
+            if (dashboardSection.classList.contains('active')) {
+                renderPerformanceChart(timeframeSelect.value);
+            }
+            resetCurrentSessionInputs();
+            displayMessageBox('Sesión guardada con éxito!');
+
+            // --- Google Sheets Integration ---
+            // 3. Genera el html indicando donde se debe agregar la url que se genere al publicar la app script en la web
+            const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxZ_rF0Tp2UORbL4eKM09jdfY049_cCMa1Ymy09KcqNWFX1skfe3aT0JGG1xR4hjHKR/exec'; // REEMPLAZA ESTO CON LA URL DE TU WEB APP DE GOOGLE APPS SCRIPT
+
+            if (WEB_APP_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL' || WEB_APP_URL === '') {
+                console.warn('La URL de Google Apps Script no está configurada. Los datos solo se guardarán localmente.');
+                displayMessageBox('Sesión guardada localmente. Para guardar en Google Sheets, configura la URL de la Web App.');
+                return;
+            }
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Usar 'no-cors' si no configuras CORS explícitamente en Apps Script
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(session) // Enviar los datos de la sesión
+                });
+                // Con 'no-cors', la respuesta no es legible, pero la solicitud se envía.
+                // Si usaras 'cors' y configuraras tu Apps Script para ello, podrías leer la respuesta:
+                // const result = await response.json();
+                // console.log('Datos enviados a Google Sheets:', result);
+                displayMessageBox('Sesión guardada y enviada a Google Sheets con éxito!');
+            } catch (error) {
+                console.error('Error enviando datos a Google Sheets:', error);
+                displayMessageBox('Sesión guardada localmente, pero hubo un error al enviar a Google Sheets. Revisa la consola para más detalles.');
+            }
+            // --- End Google Sheets Integration ---
+        });
+
+        // Function to reset current session inputs
+        function resetCurrentSessionInputs() {
+            currentMadeShots = null; // Reset to no selection
+            madeShotsDisplay.textContent = 'Selecciona...'; // Set display text back to placeholder
+            observationsTextarea.value = ''; // Clear observations textarea
+        }
+
+        // Function to reset current session
+        function resetCurrentSession() {
+            displayConfirmBox('¿Estás seguro de que quieres reiniciar la sesión actual? El campo de encestes y observaciones se restablecerán.', () => {
+                resetCurrentSessionInputs();
+            });
+        }
+
+        // Function to update statistics
+        function updateStats() {
+            let totalMade = 0;
+            let totalOverallShots = 0;
+            let bestPercentage = 0;
+
+            if (sessions.length === 0) {
+                totalMadeShotsDisplay.textContent = '0';
+                overallTotalShotsDisplay.textContent = '0';
+                overallPercentageDisplay.textContent = '0.00%';
+                bestSessionPercentageDisplay.textContent = '0.00%';
+                return;
+            }
+
+            sessions.forEach(session => {
+                totalMade += session.made;
+                totalOverallShots += session.total; // This will accumulate 50 for each session
+                if (session.percentage > bestPercentage) {
+                    bestPercentage = session.percentage;
+                }
+            });
+
+            const overallPercentage = totalOverallShots === 0 ? 0 : (totalMade / totalOverallShots * 100).toFixed(2);
+
+            totalMadeShotsDisplay.textContent = totalMade;
+            overallTotalShotsDisplay.textContent = totalOverallShots;
+            overallPercentageDisplay.textContent = `${overallPercentage}%`;
+            bestSessionPercentageDisplay.textContent = `${bestPercentage.toFixed(2)}%`;
+        }
+
+        // Function to render history
+        function renderHistory() {
+            historyList.innerHTML = ''; // Clear existing history
+            if (sessions.length === 0) {
+                historyList.innerHTML = '<p style="text-align: center; color: var(--light-color);">No hay sesiones registradas aún.</p>';
+                return;
+            }
+            sessions.slice().reverse().forEach((session, index) => { // Show most recent first
+                const listItem = document.createElement('li');
+                // Displaying date and time separately from the 'date' and 'time' properties
+                listItem.innerHTML = `
+                    <span>Fecha: ${session.date}</span>
+                    <span>Hora: ${session.time}</span>
+                    <span>Encestes: <strong>${session.made} / ${session.total}</strong></span>
+                    <span>Porcentaje: <strong>${session.percentage.toFixed(2)}%</strong></span>
+                    ${session.observations ? `<span class="full-width">Observaciones: ${session.observations}</span>` : ''}
+                `;
+                historyList.appendChild(listItem);
+            });
+        }
+
+        // Function to clear all history
+        function clearAllHistory() {
+            displayConfirmBox('¿Estás seguro de que quieres borrar todo el historial? Esta acción no se puede deshacer.', () => {
+                sessions = [];
+                localStorage.removeItem('basketballSessions');
+                updateStats();
+                renderHistory();
+                // Only re-render chart if dashboard is active
+                if (dashboardSection.classList.contains('active')) {
+                    renderPerformanceChart(timeframeSelect.value);
+                }
+                displayMessageBox('Historial borrado con éxito.');
+            });
+        }
+
+        // Helper function to get the Monday of a given date
+        function getMonday(d) {
+            d = new Date(d);
+            const day = d.getDay(); // 0 is Sunday, 1 is Monday
+            // Calculate the difference to get to Monday. If it's Sunday (0), go back 6 days. Otherwise, go back (day - 1) days.
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.getFullYear(), d.getMonth(), diff);
+        }
+
+        // --- Chart.js Rendering Function ---
+        function renderPerformanceChart(timeframe = 'day') {
+            // Destroy existing chart instance if it exists
+            if (performanceChartInstance) {
+                performanceChartInstance.destroy();
+            }
+
+            let labels = [];
+            let totalShotsData = [];
+            let madeShotsData = [];
+
+            if (timeframe === 'day') {
+                // For 'day' timeframe, show individual sessions
+                // Sort sessions by date and time to ensure chronological order within the day
+                const sortedSessions = [...sessions].sort((a, b) => {
+                    const dateA = new Date(`${a.date} ${a.time}`);
+                    const dateB = new Date(`${b.date} ${b.time}`);
+                    return dateA - dateB;
+                });
+
+                sortedSessions.forEach(session => {
+                    labels.push(`${session.date} ${session.time}`); // Label includes date and time
+                    totalShotsData.push(session.total);
+                    madeShotsData.push(session.made);
+                });
+            } else {
+                // For 'week' or 'month', aggregate data
+                let aggregatedData = {};
+                sessions.forEach(session => {
+                    const sessionDate = new Date(session.date);
+                    let key;
+                    let label;
+
+                    if (timeframe === 'week') {
+                        const monday = getMonday(sessionDate);
+                        key = monday.toLocaleDateString();
+                        label = `Semana del ${monday.toLocaleDateString()}`;
+                    } else if (timeframe === 'month') {
+                        key = `${sessionDate.getFullYear()}-${(sessionDate.getMonth() + 1).toString().padStart(2, '0')}`;
+                        label = sessionDate.toLocaleString('es-ES', { year: 'numeric', month: 'long' });
+                    }
+
+                    if (!aggregatedData[key]) {
+                        aggregatedData[key] = { made: 0, total: 0, label: label };
+                    }
+                    aggregatedData[key].made += session.made;
+                    aggregatedData[key].total += session.total;
+                });
+
+                // Sort aggregated data by date/key and prepare for Chart.js
+                const sortedKeys = Object.keys(aggregatedData).sort((a, b) => {
+                    // Custom sort for dates/keys
+                    if (timeframe === 'week') {
+                        return new Date(a) - new Date(b);
+                    } else if (timeframe === 'month') {
+                        // Compare YYYY-MM format
+                        return a.localeCompare(b);
+                    }
+                    return 0;
+                });
+
+                sortedKeys.forEach(key => {
+                    labels.push(aggregatedData[key].label);
+                    totalShotsData.push(aggregatedData[key].total);
+                    madeShotsData.push(aggregatedData[key].made);
+                });
+            }
+
+            performanceChartInstance = new Chart(performanceChartCanvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Tiros Totales',
+                            data: totalShotsData,
+                            borderColor: '#4CAF50', /* Verde Cancha */
+                            backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                            tension: 0.3,
+                            fill: false,
+                            pointRadius: 5,
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: '#4CAF50',
+                            pointBorderColor: '#fff',
+                            pointHoverBorderColor: '#4CAF50',
+                            pointHoverBorderWidth: 2,
+                        },
+                        {
+                            label: 'Encestes Realizados',
+                            data: madeShotsData,
+                            borderColor: '#FF5722', /* Naranja Baloncesto */
+                            backgroundColor: 'rgba(255, 87, 34, 0.2)',
+                            tension: 0.3,
+                            fill: false,
+                            pointRadius: 5,
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: '#FF5722',
+                            pointBorderColor: '#fff',
+                            pointHoverBorderColor: '#FF5722',
+                            pointHoverBorderWidth: 2,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Rendimiento por Sesión',
+                            color: '#FFFFFF', /* Blanco para texto */
+                            font: {
+                                size: 18,
+                                family: 'Oswald'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
+                        legend: {
+                            labels: {
+                                color: '#E0E0E0', /* Gris Claro */
+                                font: {
+                                    family: 'Roboto'
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: timeframe === 'day' ? 'Sesión (Fecha y Hora)' : (timeframe === 'week' ? 'Semana' : 'Mes'),
+                                color: '#E0E0E0', /* Gris Claro */
+                                font: {
+                                    family: 'Roboto'
+                                }
+                            },
+                            ticks: {
+                                color: '#E0E0E0', /* Gris Claro */
+                                font: {
+                                    family: 'Roboto'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Cantidad',
+                                color: '#E0E0E0', /* Gris Claro */
+                                font: {
+                                    family: 'Roboto'
+                                }
+                            },
+                            ticks: {
+                                color: '#E0E0E0', /* Gris Claro */
+                                font: {
+                                    family: 'Roboto'
+                                },
+                                beginAtZero: true
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        // --- End Chart.js Rendering Function ---
+
+
+        // Navigation between sections
+        const captureSection = document.getElementById('captureSection');
+        const statsSection = document.getElementById('statsSection');
+        const historySection = document.getElementById('historySection');
+        const dashboardSection = document.getElementById('dashboardSection'); // New dashboard section
+
+        const showCaptureBtn = document.getElementById('showCaptureBtn');
+        const showStatsBtn = document = document.getElementById('showStatsBtn');
+        const showHistoryBtn = document.getElementById('showHistoryBtn');
+        const showDashboardBtn = document.getElementById('showDashboardBtn'); // New dashboard button
+
+        function showSection(sectionId) {
+            // Hide all sections
+            captureSection.classList.remove('active');
+            statsSection.classList.remove('active');
+            historySection.classList.remove('active');
+            dashboardSection.classList.remove('active'); // Hide dashboard
+
+            // Remove 'active' class from all navigation buttons
+            showCaptureBtn.classList.remove('active');
+            showStatsBtn.classList.remove('active');
+            showHistoryBtn.classList.remove('active');
+            showDashboardBtn.classList.remove('active'); // Deactivate dashboard button
+
+            // Show selected section and activate button
+            document.getElementById(sectionId).classList.add('active');
+            if (sectionId === 'captureSection') {
+                showCaptureBtn.classList.add('active');
+            } else if (sectionId === 'statsSection') {
+                showStatsBtn.classList.add('active');
+            } else if (sectionId === 'historySection') {
+                showHistoryBtn.classList.add('active');
+            } else if (sectionId === 'dashboardSection') {
+                showDashboardBtn.classList.add('active');
+                renderPerformanceChart(timeframeSelect.value); // Render chart when dashboard is shown
+            }
+        }
+
+        showCaptureBtn.addEventListener('click', () => showSection('captureSection'));
+        showStatsBtn.addEventListener('click', () => showSection('statsSection'));
+        showHistoryBtn.addEventListener('click', () => showSection('historySection'));
+        showDashboardBtn.addEventListener('click', () => showSection('dashboardSection')); // Event listener for new button
+        timeframeSelect.addEventListener('change', (event) => {
+            renderPerformanceChart(event.target.value); // Re-render chart on timeframe change
+        });
+
+
+        // Custom Message Box (instead of alert)
+        function displayMessageBox(message) {
+            const messageBox = document.createElement('div');
+            messageBox.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: var(--dark-color);
+                color: var(--text-color);
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+                z-index: 1000;
+                text-align: center;
+                font-size: 1.2rem;
+                border: 2px solid var(--primary-color);
+            `;
+            messageBox.innerHTML = `
+                <p>${message}</p>
+                <button style="
+                    background-color: var(--primary-color);
+                    color: var(--dark-color);
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    margin-top: 15px;
+                    font-weight: bold;
+                    transition: background-color 0.3s ease;
+                " onclick="this.parentNode.remove()">OK</button>
+            `;
+            document.body.appendChild(messageBox);
+        }
+
+        // Custom Confirm Box (instead of confirm)
+        function displayConfirmBox(message, onConfirm) {
+            const confirmBox = document.createElement('div');
+            confirmBox.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: var(--dark-color);
+                color: var(--text-color);
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+                z-index: 1000;
+                text-align: center;
+                font-size: 1.2rem;
+                border: 2px solid var(--primary-color);
+            `;
+            confirmBox.innerHTML = `
+                <p>${message}</p>
+                <button style="
+                    background-color: var(--secondary-color);
+                    color: var(--dark-color);
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    margin-top: 15px;
+                    font-weight: bold;
+                    margin-right: 10px;
+                    transition: background-color 0.3s ease;
+                " id="confirmYes">Sí</button>
+                <button style="
+                    background-color: var(--primary-color);
+                    color: var(--dark-color);
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    margin-top: 15px;
+                    font-weight: bold;
+                    transition: background-color 0.3s ease;
+                " id="confirmNo">No</button>
+            `;
+            document.body.appendChild(confirmBox);
+
+            document.getElementById('confirmYes').onclick = () => {
+                onConfirm();
+                confirmBox.remove();
+            };
+            document.getElementById('confirmNo').onclick = () => {
+                confirmBox.remove();
+            };
+        }
+
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            populateMadeShotsOptions(); // Generate dropdown options
+            updateStats();
+            renderHistory();
+            showSection('captureSection'); // Show capture section on load
+        });
+
+        /*
+         * NOTA IMPORTANTE PARA LA CONEXIÓN CON GOOGLE SHEETS VIA APP SCRIPT:
+         * La función `saveSessionBtn.addEventListener` es donde se guardan los datos en localStorage.
+         * Para integrar con Google Sheets, tendrías que modificar esta parte para enviar los datos
+         * a tu Google Apps Script. Aquí hay un esquema de cómo podrías hacerlo:
+         *
+         * async function sendDataToGoogleSheets(sessionData) {
+         * const WEB_APP_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL'; // Reemplaza con tu URL
+         * try {
+         * const response = await fetch(WEB_APP_URL, {
+         * method: 'POST',
+         * mode: 'no-cors', // O 'cors' si configuras CORS en Apps Script
+         * headers: {
+         * 'Content-Type': 'application/json',
+         * },
+         * body: JSON.stringify(sessionData)
+         * });
+         * // Si usas 'no-cors', la respuesta no será legible, pero la solicitud se enviará.
+         * // Si usas 'cors' y configuras tu Apps Script para ello, puedes leer la respuesta:
+         * // const result = await response.json();
+         * // console.log('Datos enviados a Google Sheets:', result);
+         * displayMessageBox('Sesión guardada y enviada a Google Sheets!');
+         * } catch (error) {
+         * console.error('Error enviando datos a Google Sheets:', error);
+         * displayMessageBox('Sesión guardada localmente, pero hubo un error al enviar a Google Sheets.');
+         * }
+         * }
+         *
+         * // Dentro de saveSessionBtn.addEventListener, después de crear 'session':
+         * // sendDataToGoogleSheets(session);
+         *
+         */
+    </script>
+</body>
+</html>
+    
